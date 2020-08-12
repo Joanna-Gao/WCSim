@@ -8,7 +8,7 @@
 #include "G4UnionSolid.hh"
 #include "G4Sphere.hh"
 #include "G4Trd.hh"
-#include "G4IntersectionSolid.hh"
+#include "G4SubtractionSolid.hh"
 #include "G4Polyhedra.hh"
 #include "G4LogicalVolume.hh"
 #include "G4ThreeVector.hh"
@@ -28,6 +28,7 @@
 #include "G4ReflectionFactory.hh"
 #include "G4GeometryTolerance.hh"
 #include "G4GeometryManager.hh"
+#include "G4NistManager.hh"
 
 #include "WCSimTuningParameters.hh" //jl145
 
@@ -57,6 +58,7 @@ G4Colour  blue    (0.0, 0.0, 1.0) ;  // blue
 G4Colour  cyan    (0.0, 1.0, 1.0) ;  // cyan
 G4Colour  magenta (1.0, 0.0, 1.0) ;  // magenta
 G4Colour  yellow  (1.0, 1.0, 0.0) ;  // yellow
+G4Colour  grey    (0.3, 0.3, 0.3) ;  // grey
 
 #ifndef ACTIVATE_IDPMTS
  #define ACTIVATE_IDPMTS
@@ -106,6 +108,10 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
     WCRadius    = (outerAnnulusRadius + WCODLateralWaterDepth)/cos(dPhi/2.) ;
   }
 
+  // the thickness of the rock volume surrounding the tank
+  // currently set at 10m, will have option to expand to 20m in the future
+  rockThickness = 10.*m;
+
   // now we know the extend of the detector and are able to tune the tolerance
   G4GeometryManager::GetInstance()->SetWorldMaximumExtent(WCLength > WCRadius ? WCLength : WCRadius);
   G4cout << "Computed tolerance = "
@@ -122,29 +128,27 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
   // Volumes
   //-----------------------------------------------------
 
-  // The water barrel is placed in an tubs of air
+  // The water barrel is placed in a tub of air
   
   G4Tubs* solidWC = new G4Tubs("WC",
 			       0.0*m,
-			       WCRadius+2.*m,
-			       .5*WCLength+4.2*m,	//jl145 - per blueprint
+			       WCRadius+12.*m,  // added 10m extra space for the rock, same below
+			       .5*WCLength+14.2*m,	
 			       0.*deg,
 			       360.*deg);
   
   G4LogicalVolume* logicWC = 
     new G4LogicalVolume(solidWC,
-			G4Material::GetMaterial("Air"),
-			"WC",
-			0,0,0);
+	                    	G4Material::GetMaterial("Air"),
+	                      "WC",
+	                      0,0,0);
  
- 
-   G4VisAttributes* showColor = new G4VisAttributes(G4Colour(0.0,1.0,0.0));
-   logicWC->SetVisAttributes(showColor);
+  G4VisAttributes* showColor = new G4VisAttributes(G4Colour(0.0,1.0,0.0));
+  logicWC->SetVisAttributes(showColor);
+  logicWC->SetVisAttributes(G4VisAttributes::Invisible); //amb79
 
-   logicWC->SetVisAttributes(G4VisAttributes::Invisible); //amb79
-  
   //-----------------------------------------------------
-  // everything else is contained in this water tubs
+  // everything else is contained in this water tub
   //-----------------------------------------------------
   G4Tubs* solidWCBarrel = new G4Tubs("WCBarrel",
 				     0.0*m,
@@ -159,7 +163,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
 			"WCBarrel",
 			0,0,0);
 
-    G4VPhysicalVolume* physiWCBarrel = 
+  G4VPhysicalVolume* physiWCBarrel = 
     new G4PVPlacement(0,
 		      G4ThreeVector(0.,0.,0.),
 		      logicWCBarrel,
@@ -167,6 +171,42 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
 		      logicWC,
 		      false,
 	 	      0);
+
+  //-----------------------------------------------------
+  // a hollow rock cylinder surrounding the water tank
+  // using G4's boolean operation
+  //-----------------------------------------------------
+  G4Tubs* solidChunkRock = 
+    new G4Tubs("ChunkRock",
+               0.0*m,
+               WCRadius+rockThickness,
+               0.5*WCLength+rockThickness,
+               0.*deg,
+               360.*deg);
+
+  G4VSolid* solidRock =
+    new G4SubtractionSolid("Rock", solidChunkRock, solidWCBarrel);
+
+  G4Material* rock_mat = 
+    G4NistManager::Instance()->FindOrBuildMaterial("G4_CONCRETE");
+
+  G4LogicalVolume* logicRock =
+    new G4LogicalVolume(solidRock,
+                        rock_mat,
+                        "Rock");
+
+  G4VPhysicalVolume* PhysiRock = 
+    new G4PVPlacement(0,
+                      G4ThreeVector(0.,0.,0.),
+                      logicRock,
+                      "Rock",
+                      logicWC,
+                      false,
+                      0);
+
+  G4VisAttributes* showRock = new G4VisAttributes(grey);
+  logicRock->SetVisAttributes(showRock);
+  //logicRock->SetVisAttributes(G4VisAttributes::Invisible);
 
   if(isODConstructed) {
     //-----------------------------------------------------

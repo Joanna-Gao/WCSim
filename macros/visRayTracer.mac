@@ -7,6 +7,13 @@
 
 /WCSim/Construct # This must be uncommented to use RayTracer
 
+# To get nice view
+# Make the "World" box visible
+/vis/geometry/set/visibility WC 0 true
+/vis/geometry/set/colour WC 0 0.3 0.3 0.3 .3
+# "Rock" is transparent grey to represent concrete
+/vis/geometry/set/colour Rock 0 0.5 0.5 0.5 .3
+
 ## Errors may arise if using RayTracer and attempting to view the detector from a distance further than 40 meters
 ## If this occurs, attempt changing the y-direction
 

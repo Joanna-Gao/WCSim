@@ -31,7 +31,9 @@ using __gnu_cxx::hash_multimap;
 
 class G4Box;
 class G4Tubs;
+class G4SubtractionSolid;
 class G4Material;
+class G4NistManager;
 class G4LogicalVolume;
 class G4AssemblyVolume;
 class G4VPhysicalVolume;
@@ -414,6 +416,16 @@ private:
 
   // ############################# //
   // # *** END OD Parameters *** # //
+  // ############################# //
+
+  // ################# //
+  // # Rock Parameter# //
+  // ################# //
+
+  G4double rockThickness;
+
+  // ############################# //
+  // # ** END Rock Parameters ** # //
   // ############################# //
 
   // raise scope of derived parameters
