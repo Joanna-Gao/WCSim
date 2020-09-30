@@ -89,8 +89,8 @@ set(WCSIM_SCRIPTS
   macros/visRayTracer.mac
   macros/tuning_parameters.mac
   MuonFlux-HyperK-ThetaPhi.dat
-  sample-root-scripts/
-  verification-test-scripts/
+  sample-root-scripts/sample_readfile.C
+  sample-root-scripts/read_OD.C 
   )
 
 foreach(_script ${WCSIM_SCRIPTS})

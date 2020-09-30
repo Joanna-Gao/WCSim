@@ -179,7 +179,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
   G4Tubs* solidChunkRock = 
     new G4Tubs("ChunkRock",
                0.0*m,
-               WCRadius+rockThickness,
+               WCRadius+1.*m+rockThickness, // 1m extra cuz barral has 1m extra
                0.5*WCLength+rockThickness,
                0.*deg,
                360.*deg);
@@ -192,7 +192,7 @@ G4LogicalVolume* WCSimDetectorConstruction::ConstructCylinder()
 
   G4LogicalVolume* logicRock =
     new G4LogicalVolume(solidRock,
-                        rock_mat,
+                        rock_mat, // G4Material::GetMaterial("Air"), 
                         "Rock");
 
   G4VPhysicalVolume* PhysiRock = 

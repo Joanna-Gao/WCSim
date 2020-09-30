@@ -52,14 +52,15 @@ void printProgress (double percentage){
 // A function to load the libraries required, from WCSim.
 void loadlibs(){
 
-  if(const char* wcsimdirenv = std::getenv("WCSIMDIR"))
+  const char* wcsimdirenv = std::getenv("WCSIMDIR")
+  if(wcsimdirenv)
     std::cout << "Your WCSIMDIR is: " << wcsimdirenv << '\n';
 
   char libspath[1000];   // array to hold the result.
 
   const char* libWCSimRootSO = "/libWCSimRoot.so";
   const char* libWCSimRootROOTMAP = "/libWCSimRoot.rootmap";
-  const char* libWCSimRootDICT = "/src/WCSimRootDict_rdict.pcm";
+  const char* libWCSimRootDICT = "/WCSimRootDict_rdict.pcm";
   char *wcsimdirenv; 
   wcsimdirenv = getenv("WCSIMDIR"); 
 	
